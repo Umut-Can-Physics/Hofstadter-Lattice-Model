@@ -18,6 +18,8 @@ lb = 1/sqrt(2*pi*alpha)
 periodicity = true
 HardCore = true
 Nev = 10
+shift_amount = 0
+#(Nx/2 - 0.5 + im * (Ny/2 - 0.5))
 
 E, ψ = Solve(pn, Nx, Ny, alpha, periodicity, HardCore, U, Nev)
 
@@ -30,14 +32,9 @@ spbasis = NLevelBasis(N)
 basis = fermionstates(spbasis, pn)
 type = "fermion"
 l = 0
-rev = []
+rel = []
 cm = []
 UpperLimit = 100
-for i in 1:length(basis)
-    push!(rev, Relative(basis, i, Nx, Ny, UpperLimit, type))
-    push!(cm, CenterOfMass(basis, i, Nx, Ny, l, alpha, UpperLimit, type))
-end
-scatter(only.(real(rev)))
 
 ψ0, ψ1 = GeneralizedLaughlin(basis, Nx, Ny, UpperLimit, type)
 
