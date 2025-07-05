@@ -45,15 +45,15 @@ function SingleParticleModel(Nx, Ny, alpha ,periodicity)
     return H
 end
 
-function HofstadterHubbard(pn, Nx, Ny, alpha, periodicity, HardCore, U)
+function HofstadterHubbard(pn, Nx, Ny, alpha, periodicity, HardCore, U, perturbation, imp_str)
 
     if HardCore==true
-        H_MB = MBOp(pn, Nx, Ny, alpha, periodicity, HardCore)
+        H_MB = MBOp(pn, Nx, Ny, alpha, periodicity, HardCore, perturbation, imp_str)
         H_Total_full = H_MB 
         H_Total_full = (H_Total_full'+H_Total_full)/2
         
     elseif HardCore==false
-        H_MB = H_MB = MBOp(pn, Nx, Ny, alpha, periodicity, HardCore)
+        H_MB = MBOp(pn, Nx, Ny, alpha, periodicity, HardCore, perturbation, imp_str)
         H_Int = InteractionOp(pn, Nx, Ny, U, HardCore)
         H_Total_full = H_MB + H_Int
         H_Total_full = (H_Total_full'+H_Total_full)/2

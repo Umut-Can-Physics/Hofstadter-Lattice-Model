@@ -1,17 +1,14 @@
 # The definition of the Jacobi-Theta function
 function v(a, b, z, τ, UpperLimit)
-    Sum = 0
-    for n in -UpperLimit:UpperLimit
-        Sum = Sum + exp(im*pi*τ*(n+a)^2 + 2*pi*im*(n+a)*(z+b))
-    end
-    return Sum
+    ThetaFun = [exp(im*pi*τ*(n+a).^2 + 2*pi*im*(n+a)*(z+b)) for n in -UpperLimit:UpperLimit]
+    return sum(ThetaFun)
 end
 
 # Relative part of the generalized Laughlin wave function
-function Relative(basis, bi, Nx, Ny, type, shift_amount)
+function Relative(pn, basis, bi, Nx, Ny, type, UpperLimit, shift_amount)
     a = b = 1/2
     τ = im*Ny/Nx 
-    Π = 1
+    Π = 1 
     # i<j
     for i in 1:pn
         for j in (i+1):pn
@@ -29,13 +26,13 @@ function Z(basis, i, type, shift_amount)
 end
 
 # Center of mass part of the Laughlin wave function
-# l=0 or l=1 refer to two degenerate ground state 
-function CenterOfMass(basis, i, Nx, Ny, l, alpha, UpperLimit, shift_amount, type)
+# d=0 or d=1 refer to two degenerate ground state 
+function CenterOfMass(basis, bi, Nx, Ny, d, alpha, UpperLimit, shift_amount, type)
     N = Nx*Ny
     Nϕ = N*alpha
-    a = l/2 + (Nϕ-2)/4
-    b = -(Nϕ-2)/2
-    z = 2 * Z(basis, i, type, shift_amount)/Nx
+    a = d/2 + (Nϕ-2)/4
+    b = -(Nϕ-2)/2 
+    z = 2 * Z(basis, bi, type, shift_amount) / Nx
     τ = 2*im*Ny/Nx
     return v(a, b, z, τ, UpperLimit)
 end

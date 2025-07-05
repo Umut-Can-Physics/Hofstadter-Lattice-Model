@@ -23,7 +23,7 @@ function SPOp(Nx, Ny, alpha, periodicity)
     return dense((H'+H)/2)
 end
 
-function MBOp(pn, Nx, Ny, alpha, periodicity, HardCore)
+function MBOp(pn, Nx, Ny, alpha, periodicity, HardCore, perturbation, imp_str)
 
     mb_basis = MBBasis(pn, Nx, Ny, HardCore)
 
@@ -56,6 +56,10 @@ function MBOp(pn, Nx, Ny, alpha, periodicity, HardCore)
     # Construct the sparse matrix directly
     sparse_data = sparse(I, J, V, only(mb_basis.shape), only(mb_basis.shape))
     mb_op.data = sparse_data
+
+    if perturbation == true
+        mb_op += imp_str*number(mb_basis, 1)
+    end
 
     return mb_op
 end

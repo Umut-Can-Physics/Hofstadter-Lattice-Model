@@ -1,6 +1,7 @@
 using Revise
 using QuantumOptics
 using Plots
+using LaTeXStrings
 includet("Laughlin Scripts/GeneralizedLaughlin.jl")
 includet("Laughlin Scripts/JacobiThetaFunction.jl")
 includet("Main Scripts/Lattice.jl")
@@ -8,6 +9,7 @@ includet("Main Scripts/Model.jl")
 includet("Main Scripts/MBBasis.jl")
 includet("Main Scripts/Operators.jl")
 includet("Main Scripts/ED.jl")
+includet("Main Scripts/Utilities.jl")
 
 pn = 2
 Nx = 4
@@ -19,43 +21,43 @@ periodicity = true
 HardCore = true
 Nev = 10
 shift_amount = 0
-#(Nx/2 - 0.5 + im * (Ny/2 - 0.5))
 
-E, ψ = Solve(pn, Nx, Ny, alpha, periodicity, HardCore, U, Nev)
-
-function Overlap(ψ1, ψ2)
-    return abs.(ψ1'*ψ2)^2
-end
+imp_str = 0
+perturbation = false
+E, ψ = Solve(pn, Nx, Ny, alpha, periodicity, HardCore, U, Nev, perturbation, imp_str)
 
 N = Nx*Ny
 spbasis = NLevelBasis(N)
 basis = fermionstates(spbasis, pn)
 type = "fermion"
-l = 0
 rel = []
 cm = []
-UpperLimit = 100
+UpperLimit = 10
 
 ψ0, ψ1 = GeneralizedLaughlin(basis, Nx, Ny, UpperLimit, type)
 
+ψ0'*ψ1 #check
+
+scatter(abs.(ψ0), label=L"\psi_{d=0}", xlabel="Basis order", ylabel=L"|\psi|")
+scatter!(abs.(ψ1))
+
+scatter!(abs.(ψ[:,1]),label=L"\psi_{ED,1}", xlabel="Basis order", ylabel=L"|\psi|")
+scatter!(abs.(ψ[:,2]),label=L"\psi_{ED,2}", xlabel="Basis order", ylabel=L"|\psi|")
+
 mb = MBBasis(pn, Nx, Ny, HardCore)
 
-function RealSpaceDensity(Nx, Ny, ψ,mb)
-    N = Nx*Ny
-    Density = zeros(N)
-    for n in 1:N
-        Density[n] = ψ'*number(mb, n).data*ψ
-    end
-    return reshape(Density, Nx, Ny)
-end
+heatmap(RealSpaceDensity(Nx, Ny, ψ0, mb).+RealSpaceDensity(Nx, Ny, ψ1, mb))
 
-heatmap(RealSpaceDensity(Nx, Ny, ψ0, mb))
+heatmap(RealSpaceDensity(Nx, Ny, ψ[:,1], mb).+RealSpaceDensity(Nx, Ny, ψ[:,2], mb))
 
-heatmap(RealSpaceDensity(Nx, Ny, ψ1, mb))
+Overlap(ψ0, ψ[:,1])
+Overlap(ψ0, ψ[:,2])
+Overlap(ψ1, ψ[:,1])
+Overlap(ψ1, ψ[:,2])
 
-heatmap(RealSpaceDensity(Nx, Ny, ψ[1].data, mb).+RealSpaceDensity(Nx, Ny, ψ[2].data, mb))
+W = OverlapMat(ψ0, ψ1, ψ[:,1], ψ[:,2])
+HilbertSchmidtNorm(W)
 
-Overlap(ψ0, ψ[1].data)
-Overlap(ψ0, ψ[2].data)
-Overlap(ψ1, ψ[1].data)
-Overlap(ψ1, ψ[2].data)
+overlap_values = CoeffOptimization(ψ0, ψ1, ψ[:,2])
+maximum(overlap_values)
+plot(overlap_values)
