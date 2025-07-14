@@ -1,6 +1,6 @@
 using OffsetArrays
 
-function square_lattice(Nx,Ny)    
+function square_lattice(Nx::Int, Ny::Int)    
     site_idx = range(1,Nx*Ny) 
     lattice = OffsetArray(reshape(site_idx, (Nx,Ny)), 0:Nx-1, 0:Ny-1) |> transpose
     coordinates = []
@@ -14,7 +14,7 @@ function square_lattice(Nx,Ny)
     return lattice, coordinates
 end
 
-function neighbors(Nx, Ny, periodicity)
+function neighbors(Nx::Int, Ny::Int, periodicity::Bool)
     
     lattice = square_lattice(Nx,Ny)[1]
     Neighbors = []

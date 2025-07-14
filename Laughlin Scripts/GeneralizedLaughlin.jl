@@ -14,9 +14,9 @@ function BosonLabels(A::Vector{<:Real})
 end
 
 # Just convert matrix to vector
-SiteCoordinates(Nx, Ny) = [Vector{Float64}(row) for row in eachrow(square_lattice(Nx,Ny)[2])]
+SiteCoordinates(Nx::Int, Ny::Int) = [Vector{Float64}(row) for row in eachrow(square_lattice(Nx,Ny)[2])]
 
-function ParCoord(Nx, Ny, basis, i, type)
+function ParCoord(Nx::Int, Ny::Int, basis, i::Int, type::String)
     SiteCoords = SiteCoordinates(Nx, Ny)   
     if type == "boson"
         result = SiteCoords[BosonLabels(basis[i])]

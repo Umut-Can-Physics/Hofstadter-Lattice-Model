@@ -1,6 +1,6 @@
 using QuantumOptics
 
-function MBBasis(pn, Nx, Ny, HardCore)
+function MBBasis(pn::Int, Nx::Int, Ny::Int, HardCore::Bool)
     N = Nx*Ny
     sp_basis = NLevelBasis(N)
     if HardCore==false

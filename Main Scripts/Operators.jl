@@ -2,13 +2,13 @@ using ProgressMeter
 using SparseArrays
 
 # Convert matrices to operator type 
-function SPOp(Nx, Ny, alpha, periodicity)
+function SPOp(Nx::Int, Ny::Int, α::Float64, periodicity::Bool, gauge::String)
     
     N = Nx*Ny
 
     sp_basis = NLevelBasis(N) 
 
-    sp_matrix = SingleParticleModel(Nx, Ny, alpha ,periodicity)
+    sp_matrix = SingleParticleModel(Nx, Ny, α ,periodicity, gauge)
 
     H = SparseOperator(sp_basis)
 
@@ -23,11 +23,11 @@ function SPOp(Nx, Ny, alpha, periodicity)
     return dense((H'+H)/2)
 end
 
-function MBOp(pn, Nx, Ny, alpha, periodicity, HardCore, perturbation, imp_str)
+function MBOp(pn::Int, Nx::INt, Ny::Int, α::Float64, periodicity::Bool, gauge::String, HardCore::Bool, perturbation::Bool, imp_str::Float64)
 
     mb_basis = MBBasis(pn, Nx, Ny, HardCore)
 
-    sp_op = SPOp(Nx, Ny, alpha, periodicity)
+    sp_op = SPOp(Nx, Ny, α, periodicity, gauge)
 
     mb_op = SparseOperator(mb_basis)
     N = size(sp_op.data, 1) # More robust way to get dimension
@@ -64,7 +64,7 @@ function MBOp(pn, Nx, Ny, alpha, periodicity, HardCore, perturbation, imp_str)
     return mb_op
 end
 
-function InteractionOp(pn, Nx, Ny, U, HardCore)
+function InteractionOp(pn::Int, Nx::Int, Ny::Int, U::Float64, HardCore::Bool)
 
     N = Nx*Ny
     sp_basis = NLevelBasis(N)
@@ -76,7 +76,7 @@ function InteractionOp(pn, Nx, Ny, U, HardCore)
     Vint2 = SparseOperator(basis2)
 
     for n in 1:N
-        Vint2 += U/2*transition(sp_basis,n,n)⊗transition(sp_basis,n,n)
+        Vint2 += U/2*transition(sp_basis,n,n) ⊗ transition(sp_basis,n,n)
     end
 
     Vint_mb = manybodyoperator(mb_basis, Vint2)
