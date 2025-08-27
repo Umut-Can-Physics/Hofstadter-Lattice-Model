@@ -24,21 +24,27 @@ function SortStates(E, ψ)
     return E, ψ
 end
 
-function Solve(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, Nev, perturbation, imp_str, method)
-    H = HubbardHofstadter(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, perturbation, imp_str)
-    if method == "Lapack"
-        H = Matrix(H.data)
-        E, ψ = eigen(H); 
-        E, ψ = SortStates(E, ψ)
-    elseif method == "Arpack"
-        H = Matrix(H.data)
+function Solve(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, Nev, perturbation, imp_str, method, problem_type)
+    if problem_type == "MB"
+        H = HubbardHofstadter(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, perturbation, imp_str)
+        if method == "Lapack"
+            H = Matrix(H.data)
+            E, ψ = eigen(H); 
+            E, ψ = SortStates(E, ψ)
+        elseif method == "Arpack"
+            H = Matrix(H.data)
+            E, ψ = eigs(H, nev=Nev, which=:SR)
+            E, ψ = SortStates(E, ψ)
+        elseif method == "KrylovKit"
+            E, ψ = eigenstates(dense(H), Nev)
+            E, ψ = SortStates(E, ψ)
+        else
+            error("Invalid method. Use 'Lapack', 'Arpack', or 'KrylovKit'.")
+        end
+    elseif problem_type == "SP"
+        H = SingleParticleModel(Nx, Ny, alpha, periodicity, gauge)
         E, ψ = eigs(H, nev=Nev, which=:SR)
         E, ψ = SortStates(E, ψ)
-    elseif method == "KrylovKit"
-        E, ψ = eigenstates(dense(H), Nev)
-        E, ψ = SortStates(E, ψ)
-    else
-        error("Invalid method. Use 'Lapack', 'Arpack', or 'KrylovKit'.")
     end
     return E, ψ
 end

@@ -23,7 +23,7 @@ function SPOp(Nx::Int, Ny::Int, α::Float64, periodicity::Bool, gauge::String)
     return dense((H'+H)/2)
 end
 
-function MBOp(pn::Int, Nx::INt, Ny::Int, α::Float64, periodicity::Bool, gauge::String, HardCore::Bool, perturbation::Bool, imp_str::Float64)
+function MBOp(pn::Int, Nx::Int, Ny::Int, α::Float64, periodicity::Bool, gauge::String, HardCore::Bool, perturbation::Bool, imp_str::Float64)
 
     mb_basis = MBBasis(pn, Nx, Ny, HardCore)
 

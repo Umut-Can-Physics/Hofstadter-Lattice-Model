@@ -46,6 +46,24 @@ function GeneralizedLaughlin(basis, Nx, Ny, UpperLimit, type)
     d = 1
     ψ_CM1 = [CenterOfMass(basis, bi, Nx, Ny, d, alpha, UpperLimit, shift_amount, type) for bi in 1:length(basis)]
     ψ1 = normalize(ψ_rel.*ψ_CM1.*ExpFun)
-    
+
     return ψ0, ψ1
+end
+
+function CompositeBosonMBPart(basis, Nx, Ny, UpperLimit, type)
+    ψ_rel = [Relative(pn, basis, bi, Nx, Ny, type, UpperLimit, shift_amount) for bi in 1:length(basis)]
+
+    d = 0
+    ψ_CM0 = [CenterOfMass(basis, bi, Nx, Ny, d, alpha, UpperLimit, shift_amount, type) for bi in 1:length(basis)]
+    ψ0 = normalize(ψ_rel.*ψ_CM0)
+ 
+    d = 1
+    ψ_CM1 = [CenterOfMass(basis, bi, Nx, Ny, d, alpha, UpperLimit, shift_amount, type) for bi in 1:length(basis)]
+    ψ1 = normalize(ψ_rel.*ψ_CM1)
+
+    d = 2
+    ψ_CM2 = [CenterOfMass(basis, bi, Nx, Ny, d, alpha, UpperLimit, shift_amount, type) for bi in 1:length(basis)]
+    ψ2 = normalize(ψ_rel.*ψ_CM2.*ExpFun)
+
+    return ψ0, ψ1, ψ2
 end

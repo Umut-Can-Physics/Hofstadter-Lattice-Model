@@ -16,11 +16,11 @@ end
 
 "Overlap matrix for Laughlin ν=1/2"
 function OverlapMat(ψ0, ψ1, ψED_1, ψED_2)
-    # Generalized Laughlin Wave Functions for d=1 and d=2
+    # Generalized Laughlin Wave Functions for d=0 and d=1
     AnalyticWaveFunction = [ψ0, ψ1]
     # ED States
     EDStates = [ψED_1, ψED_2]
-    OvMat = zeros(2,2)
+    OvMat = zeros(2,2) 
     for i in 1:2
         for j in 1:2
             OvMat[i,j] = Overlap(AnalyticWaveFunction[i], EDStates[j])
@@ -34,7 +34,7 @@ function HilbertSchmidtNorm(W)
     Σ = 0
     for i in 1:dim
         for j in 1:dim
-            Σ += (W'*W)[i,j]^2
+            Σ += abs((W'*W)[i,j])^2
         end
     end
     return sqrt((1/dim)*Σ)

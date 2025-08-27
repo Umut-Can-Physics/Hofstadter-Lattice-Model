@@ -63,7 +63,7 @@ function SingleParticleModel(Nx::Int, Ny::Int, α::Float64 ,periodicity::Bool, g
     return H
 end
 
-function HubbardHofstadter(pn::Int, Nx::Int, Ny::Int, α::Float64, periodicity::Bool, gauge::String, HardCore::Bool, U::Float64, perturbation, imp_str)
+function HubbardHofstadter(pn::Int, Nx::Int, Ny::Int, α::Float64, periodicity::Bool, gauge::String, HardCore::Bool, U::Float64, perturbation::Bool, imp_str::Float64)
 
     if HardCore==true
         H_MB = MBOp(pn, Nx, Ny, α, periodicity, gauge, HardCore, perturbation, imp_str)
