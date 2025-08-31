@@ -26,7 +26,8 @@ shift_amount = 0
 imp_str = 0.0
 perturbation = false
 method = "Lapack" # "Lapack", "Arpack", "KrylovKit"
-E, ψ = Solve(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, Nev, perturbation, imp_str, method)
+problem_type = "MB" # 'SP' or 'MB'
+E, ψ = Solve(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, Nev, perturbation, imp_str, method, problem_type)
 
 OccBasis = MBBasis(pn, Nx, Ny, HardCore).occupations
 

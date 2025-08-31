@@ -65,7 +65,7 @@ function MBOp(pn::Int, Nx::Int, Ny::Int, α::Float64, periodicity::Bool, gauge::
 end
 
 function InteractionOp(pn::Int, Nx::Int, Ny::Int, U::Float64, HardCore::Bool)
-
+ 
     N = Nx*Ny
     sp_basis = NLevelBasis(N)
 
