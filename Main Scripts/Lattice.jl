@@ -4,16 +4,11 @@ function square_lattice(Nx::Int, Ny::Int)
     site_idx = range(1,Nx*Ny)  
     lattice = OffsetArray(reshape(site_idx, (Nx,Ny)), 0:Nx-1, 0:Ny-1) |> transpose
     coordinates = []
-    #= for y in 0:Ny-1
+    for y in 0:Ny-1
         for x in 0:Nx-1
             coordinates = [coordinates; x; y]
         end
-    end =# 
-    for x in 0:Nx-1
-        for y in 0:Ny-1
-            coordinates = [coordinates; x; y]
-        end
-    end
+    end 
     coordinates = reshape(coordinates, (2, Nx*Ny)) |> transpose
     
     return lattice, coordinates

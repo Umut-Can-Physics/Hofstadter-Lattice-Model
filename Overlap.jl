@@ -30,10 +30,8 @@ problem_type = "MB" # 'SP' or 'MB'
 E, ψ = Solve(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, Nev, perturbation, imp_str, method, problem_type)
 
 OccBasis = MBBasis(pn, Nx, Ny, HardCore).occupations
-
 type = "fermion"
 UpperLimit = 10
-
 ψ0, ψ1 = GeneralizedLaughlin(OccBasis, Nx, Ny, UpperLimit, type)
 
 ψ0'*ψ1 #check
@@ -44,11 +42,9 @@ scatter!(abs.(ψ1))
 scatter!(abs.(ψ[:,1]),label=L"\psi_{ED,1}", xlabel="Basis order", ylabel=L"|\psi|")
 scatter!(abs.(ψ[:,2]),label=L"\psi_{ED,2}", xlabel="Basis order", ylabel=L"|\psi|")
 
-mb = MBBasis(pn, Nx, Ny, HardCore)
+heatmap(RealSpaceDensity(Nx, Ny, ψ0, OccBasis).+RealSpaceDensity(Nx, Ny, ψ1, OccBasis))
 
-heatmap(RealSpaceDensity(Nx, Ny, ψ0, mb).+RealSpaceDensity(Nx, Ny, ψ1, mb))
-
-heatmap(RealSpaceDensity(Nx, Ny, ψ[:,1], mb).+RealSpaceDensity(Nx, Ny, ψ[:,2], mb))
+heatmap(RealSpaceDensity(Nx, Ny, ψ[:,1], OccBasis).+RealSpaceDensity(Nx, Ny, ψ[:,2], OccBasis))
 
 Overlap(ψ0, ψ[:,1])
 Overlap(ψ0, ψ[:,2])

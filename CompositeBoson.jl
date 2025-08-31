@@ -43,12 +43,12 @@ scatter(real(E_sp))
 Ψ_CBB, TESTT = CompositeBoson(OccBasis, Nx, Ny, lb, lb_prime, UpperLimit, type, ψ_sp)
 # Normalize rows
 Ψ_CBB = normalize.(eachcol(Ψ_CBB))
-scatter(abs.(Ψ_CB[1]))
+scatter(abs.(Ψ_CBB[1]))
 Ψ_ED = ψ_mb[:,1:9]
 Overlapss = []
 for k in 1:9
     for l in 1:9
-        push!(Overlapss,abs(Ψ_CB[k]'*Ψ_ED[:,l])^2)
+        push!(Overlapss,abs(Ψ_CBB[k]'*Ψ_ED[:,l])^2)
     end
 end
 overlaps = reshape(Overlapss, (9,9))
