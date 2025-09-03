@@ -27,6 +27,7 @@ end
 function Solve(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, Nev, perturbation, imp_str, method, problem_type)
     if problem_type == "MB"
         H = HubbardHofstadter(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, perturbation, imp_str)
+        println("Solving the system using ", method, " method for ", problem_type, " problem...")
         if method == "Lapack"
             H = Matrix(H.data)
             E, ψ = eigen(H); 
@@ -43,8 +44,9 @@ function Solve(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, Nev, perturba
         end
     elseif problem_type == "SP"
         H = SingleParticleModel(Nx, Ny, alpha, periodicity, gauge)
+        println("Solving the system using ", method, " method for ", problem_type, " problem...")
         E, ψ = eigs(H, nev=Nev, which=:SR)
         E, ψ = SortStates(E, ψ)
     end
-    return E, ψ
+    return E, ψ, H
 end

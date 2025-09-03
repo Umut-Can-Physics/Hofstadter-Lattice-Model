@@ -38,7 +38,8 @@ function MBOp(pn::Int, Nx::Int, Ny::Int, α::Float64, periodicity::Bool, gauge::
     V = Vector{ComplexF64}()
 
     println("Building many-body operator...")
-    @showprogress for j in 1:N
+    for j in 1:N
+        println("Processing column ", j, " out of ", N)
         for i in 1:N
             if !iszero(sp_op.data[i, j])
                 transition_op = transition(mb_basis, i, j)

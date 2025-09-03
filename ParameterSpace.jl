@@ -37,7 +37,8 @@ end
 
 N = 2
 Nphi = 2
-params = generate_parameter_space(N, Nphi; maxNxy=10)
+maxNxy = 6
+params = generate_parameter_space(N, Nphi; maxNxy)
 
 for (Nx, Ny, p, q) in params
     println("Nx=$Nx, Ny=$Ny, Aspect Ratio=$(Nx/Ny) ,p=$p, q=$q, phi=$(p//q): Hilbert Space Dimension=$(binomial(Nx*Ny, N))")

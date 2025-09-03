@@ -34,7 +34,7 @@ end
 e(Nx, Ny, lb, basis, bi, type, shift_amount) = exp( - sum( imag.( ComplexCoords(Nx, Ny, basis, bi, type, shift_amount) ).^2 ) / (2*lb^2) ) 
 
 ∑(Nx, Ny, basis, bi, type, shift_amount) = sum( imag.( ComplexCoords(Nx, Ny, basis, bi, type, shift_amount) ).^2 )
-e_CB(Nx, Ny, lb, lb_prime, basis, bi, type, shift_amount) = exp( - ∑(Nx, Ny, basis, bi, type, shift_amount)/4 * ( 1/lb^2 - 1/lb_prime^2 ) )
+e_CB(Nx, Ny, lb, lb_prime, basis, bi, type, shift_amount) = exp( - ∑(Nx, Ny, basis, bi, type, shift_amount)/2 * ( 1/lb^2 - 1/lb_prime^2 ) )
 
 function GeneralizedLaughlin(basis, Nx, Ny, UpperLimit, type)
      
@@ -74,14 +74,14 @@ function CompositeBosonMBPart(basis, Nx, Ny, UpperLimit, type)
 end
 
 # 𝜓ₛₚ two degenerate ground state
-function CompositeBoson(basis, Nx, Ny, lb, lb_prime, UpperLimit, type, 𝜓ₛₚ)
+function CompositeBoson(basis, Nx, Ny, lb, lb_prime, UpperLimit, type, 𝜓ₛₚ, z_nu0, z_nu1, z_nu2)
 
-    @warn "CompositeBoson function is valid only for 2 particle and two sp ground state and degeneracy."
+    #@warn "CompositeBoson function is valid only for 2 particle and two sp ground state and degeneracy."
     
     SiteCoords = SiteCoordinates(Nx, Ny)
 
     ψ_CB = zeros(ComplexF64, length(basis), 9) # 3(sp) * 3(MB)
-    TESTT = []
+
     for bi in eachindex(basis)
 
         #- SP PART -#
@@ -103,11 +103,23 @@ function CompositeBoson(basis, Nx, Ny, lb, lb_prime, UpperLimit, type, 𝜓ₛ�
         𝜓ᵢⱼ = [𝜓₁₁, 𝜓₂₂, 𝜓₁₂]
 
         # MB PART #
-
+ 
         ψ_rel = Relative(pn, basis, bi, Nx, Ny, type, UpperLimit, shift_amount)
-        ψ_CM0 = CenterOfMass(basis, bi, Nx, Ny, 0, alpha, UpperLimit, shift_amount, type)
+
+        
+        #= ψ_CM0 = CenterOfMass(basis, bi, Nx, Ny, 0, alpha, UpperLimit, shift_amount, type)
         ψ_CM1 = CenterOfMass(basis, bi, Nx, Ny, 1, alpha, UpperLimit, shift_amount, type)
-        ψ_CM2 = CenterOfMass(basis, bi, Nx, Ny, 2, alpha, UpperLimit, shift_amount, type)
+        ψ_CM2 = CenterOfMass(basis, bi, Nx, Ny, 2, alpha, UpperLimit, shift_amount, type) =#
+        
+
+        #= ψ_CM0 = CenterOfMass_CB(basis, bi, Nx, Ny, pn, Nphi, 0, alpha, UpperLimit, shift_amount, type)
+        ψ_CM1 = CenterOfMass_CB(basis, bi, Nx, Ny, pn, Nphi, 1, alpha, UpperLimit, shift_amount, type)
+        ψ_CM2 = CenterOfMass_CB(basis, bi, Nx, Ny, pn, Nphi, 2, alpha, UpperLimit, shift_amount, type) =#
+
+        ψ_CM0 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu0)
+        ψ_CM1 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu1)
+        ψ_CM2 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu2)
+
         ExpFun = e_CB(Nx, Ny, lb, lb_prime, basis, bi, type, shift_amount)
 
         𝜓₁ = ψ_rel*ψ_CM0*ExpFun # \psi_L(r_1,r_2) for d=0
@@ -120,5 +132,5 @@ function CompositeBoson(basis, Nx, Ny, lb, lb_prime, UpperLimit, type, 𝜓ₛ�
 
     end
 
-    return ψ_CB, TESTT
+    return ψ_CB
 end
