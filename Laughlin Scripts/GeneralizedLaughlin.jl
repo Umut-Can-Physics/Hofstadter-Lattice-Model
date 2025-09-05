@@ -74,7 +74,7 @@ function CompositeBosonMBPart(basis, Nx, Ny, UpperLimit, type)
 end
 
 # 𝜓ₛₚ two degenerate ground state
-function CompositeBoson(basis, Nx, Ny, lb, lb_prime, UpperLimit, type, 𝜓ₛₚ, z_nu0, z_nu1, z_nu2)
+function CompositeBoson(basis, Nx, Ny, lb, lb_prime, UpperLimit, type, 𝜓ₛₚ, z_nu_row0, z_nu_row1, z_nu_row2)
 
     #@warn "CompositeBoson function is valid only for 2 particle and two sp ground state and degeneracy."
     
@@ -116,9 +116,13 @@ function CompositeBoson(basis, Nx, Ny, lb, lb_prime, UpperLimit, type, 𝜓ₛ�
         ψ_CM1 = CenterOfMass_CB(basis, bi, Nx, Ny, pn, Nphi, 1, alpha, UpperLimit, shift_amount, type)
         ψ_CM2 = CenterOfMass_CB(basis, bi, Nx, Ny, pn, Nphi, 2, alpha, UpperLimit, shift_amount, type) =#
 
-        ψ_CM0 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu0)
-        ψ_CM1 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu1)
-        ψ_CM2 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu2)
+        ψ_CM0 = CM_New_2(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row0)
+        ψ_CM1 = CM_New_2(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row1)
+        ψ_CM2 = CM_New_2(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row2)
+
+        #= ψ_CM0 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row0)
+        ψ_CM1 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row1)
+        ψ_CM2 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row2) =#
 
         ExpFun = e_CB(Nx, Ny, lb, lb_prime, basis, bi, type, shift_amount)
 

@@ -31,13 +31,8 @@ end
 
 function HilbertSchmidtNorm(W)
     dim = size(W, 1) # Dimension of square matrix
-    Σ = 0
-    for i in 1:dim
-        for j in 1:dim
-            Σ += abs((W'*W)[i,j])^2
-        end
-    end
-    return sqrt((1/dim)*Σ)
+    WW = sum(abs.(W'*W).^2)
+    return sqrt((1/dim)*WW)
 end
 
 function RealSpaceDensity(Nx, Ny, ψ,mb)

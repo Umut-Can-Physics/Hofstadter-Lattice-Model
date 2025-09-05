@@ -49,9 +49,27 @@ function CenterOfMass_CB(basis, bi, Nx, Ny, pn, Nphi, d, alpha, UpperLimit, shif
     return v(a, b, z, τ, UpperLimit) 
 end
 
-function CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu)
+function CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row)
     a = b = 1/2
     τ = im*Ny/Nx 
-    z = (Z(basis, bi, type, shift_amount)-z_nu) / Nx
+    Π = 1
+    for i in 1:3
+        z = (Z(basis, bi, type, shift_amount)-z_nu_row[i]) / Nx
+        Π *= v(a, b, z, τ, UpperLimit)
+    end
+    return Π
+end 
+
+function CM_New_2(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu)
+    a = b = 1/2
+    τ = im*Ny/Nx 
+    z = ( Z(basis, bi, type, shift_amount) - z_nu ) / Nx
+    return v(a, b, z, τ, UpperLimit)^2
+end 
+
+function CM_New_3(Nx, Ny, UpperLimit, z_coord, z_nu)
+    a = b = 1/2
+    τ = im*Ny/Nx 
+    z = ( z_coord - z_nu ) / Nx
     return v(a, b, z, τ, UpperLimit)^2
 end 
