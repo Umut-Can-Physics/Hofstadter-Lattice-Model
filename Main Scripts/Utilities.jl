@@ -62,3 +62,36 @@ function CoeffOptimization(ψ_1, ψ_2, Ψ_ED)
     end
     return overlap_values
 end
+
+function random_complex_triples(Nx::Int, Ny::Int, num_samples::Int)
+    triples = []
+
+    while length(triples) < num_samples
+        # generate 3 random complex numbers
+        z = Complex{Int}[]
+        while length(z) < 3
+            x, y = rand(0:Nx-1), rand(0:Ny-1)
+            c = complex(x, y)
+            if !(c in z) # ensure uniqueness
+                push!(z, c)
+            end
+        end
+        push!(triples, tuple(z...))
+    end
+
+    return triples
+end
+
+function gram_schmidt_qr(vectors::Vector{Vector{T}}) where T<:Number
+    # Convert array-of-vectors into a matrix (columns are the vectors)
+    M = hcat(vectors...)  
+    
+    # QR factorization
+    F = qr(M)
+    
+    # Extract Q (orthonormal basis as a matrix)
+    Q = Matrix(F.Q)
+    
+    # Return as array-of-vectors
+    return [Q[:,i] for i in 1:size(Q,2)]
+end

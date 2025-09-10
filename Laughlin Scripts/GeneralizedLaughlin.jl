@@ -18,7 +18,7 @@ SiteCoordinates(Nx::Int, Ny::Int) = [Vector{Float64}(row) for row in eachrow(squ
 
 function ParCoord(Nx::Int, Ny::Int, basis, i::Int, type::String)
     SiteCoords = SiteCoordinates(Nx, Ny)   
-    if type == "boson"
+    if type == "boson" 
         result = SiteCoords[BosonLabels(basis[i])]
     elseif type=="fermion"
         result = SiteCoords[findall(x->x≠0, basis[i])]
@@ -28,113 +28,82 @@ end
 
 function ComplexCoords(Nx, Ny, basis, i, type, shift_amount) 
     base_coords = Complex.(getindex.(ParCoord(Nx, Ny, basis, i, type), 1), getindex.(ParCoord(Nx, Ny, basis, i, type), 2))
-    return base_coords .- shift_amount  
+    return base_coords .- shift_amount   
 end
-
-e(Nx, Ny, lb, basis, bi, type, shift_amount) = exp( - sum( imag.( ComplexCoords(Nx, Ny, basis, bi, type, shift_amount) ).^2 ) / (2*lb^2) ) 
 
 ∑(Nx, Ny, basis, bi, type, shift_amount) = sum( imag.( ComplexCoords(Nx, Ny, basis, bi, type, shift_amount) ).^2 )
+
+e(Nx, Ny, lb, basis, bi, type, shift_amount) = exp( -∑(Nx, Ny, basis, bi, type, shift_amount) / (2*lb^2) ) 
+
 e_CB(Nx, Ny, lb, lb_prime, basis, bi, type, shift_amount) = exp( - ∑(Nx, Ny, basis, bi, type, shift_amount)/2 * ( 1/lb^2 - 1/lb_prime^2 ) )
 
-function GeneralizedLaughlin(basis, Nx, Ny, UpperLimit, type)
-     
-    ψ_rel = [Relative(pn, basis, bi, Nx, Ny, type, UpperLimit, shift_amount) for bi in 1:length(basis)]
+function CB_Component(Nx, Ny, Nphi, basis, bi, type, shift_amount, SiteCoords, 𝜓ₛₚ, UpperLimit, WF, lb, lb_prime)
+    #- SP PART -#
 
-    ExpFun = [e(Nx, Ny, lb, basis, i, type, shift_amount) for i in 1:length(basis)]
- 
-    d = 0 
-    ψ_CM0 = [CenterOfMass(basis, bi, Nx, Ny, d, alpha, UpperLimit, shift_amount, type) for bi in 1:length(basis)]
-    ψ0 = normalize(ψ_rel.*ψ_CM0.*ExpFun)
- 
-    d = 1
-    ψ_CM1 = [CenterOfMass(basis, bi, Nx, Ny, d, alpha, UpperLimit, shift_amount, type) for bi in 1:length(basis)]
-    ψ1 = normalize(ψ_rel.*ψ_CM1.*ExpFun)
-
-    return ψ0, ψ1
-end
-
-function CompositeBosonMBPart(basis, Nx, Ny, UpperLimit, type)
-    ψ_rel = [Relative(pn, basis, bi, Nx, Ny, type, UpperLimit, shift_amount) for bi in 1:length(basis)]
-
-    ExpFun = [e_CB(Nx, Ny, lb, lb_prime, basis, bi, type, shift_amount) for bi in 1:length(basis)]
- 
-    d = 0
-    ψ_CM0 = [CenterOfMass(basis, bi, Nx, Ny, d, alpha, UpperLimit, shift_amount, type) for bi in 1:length(basis)]
-    ψ0 = ψ_rel.*ψ_CM0.*ExpFun
- 
-    d = 1
-    ψ_CM1 = [CenterOfMass(basis, bi, Nx, Ny, d, alpha, UpperLimit, shift_amount, type) for bi in 1:length(basis)]
-    ψ1 = ψ_rel.*ψ_CM1.*ExpFun
-
-    d = 2
-    ψ_CM2 = [CenterOfMass(basis, bi, Nx, Ny, d, alpha, UpperLimit, shift_amount, type) for bi in 1:length(basis)]
-    ψ2 = ψ_rel.*ψ_CM2.*ExpFun
-
-    return ψ0, ψ1, ψ2
-end
-
-# 𝜓ₛₚ two degenerate ground state
-function CompositeBoson(basis, Nx, Ny, lb, lb_prime, UpperLimit, type, 𝜓ₛₚ, z_nu_row0, z_nu_row1, z_nu_row2)
-
-    #@warn "CompositeBoson function is valid only for 2 particle and two sp ground state and degeneracy."
+    # coordinates of occupied sites in the MB basis
+    r1 = [real(ComplexCoords(Nx, Ny, basis, bi, type, shift_amount)[1]), imag(ComplexCoords(Nx, Ny, basis, bi, type, shift_amount)[1])]
+    r2 = [real(ComplexCoords(Nx, Ny, basis, bi, type, shift_amount)[2]), imag(ComplexCoords(Nx, Ny, basis, bi, type, shift_amount)[2])]
+    r = [r1, r2]
+    # find lattice index of these coordinates
+    R = indexin(r, SiteCoords) 
     
-    SiteCoords = SiteCoordinates(Nx, Ny)
+    # SP basis amplitudes corresponding to occupied MB basis
+    α₁ = 𝜓ₛₚ[:,1][R]
+    α₂ = 𝜓ₛₚ[:,2][R]
+    𝜓₁₁ = 2 * α₁[1] * α₁[2] # 2 \phi_1(r_1) * \phi_1(r_2) 
+    𝜓₂₂ = 2 * α₂[1] * α₂[2] # 2 \phi_2(r_1) * \phi_2(r_2) 
+    𝜓₁₂ = α₁[1] * α₂[2] + α₂[1] * α₁[2] # \phi_1(r_1) * \phi_2(r_2) + \phi_2(r_1) * \phi_1(r_2)
 
-    ψ_CB = zeros(ComplexF64, length(basis), 9) # 3(sp) * 3(MB)
+    𝜓ᵢⱼ = [𝜓₁₁, 𝜓₂₂, 𝜓₁₂] 
 
-    for bi in eachindex(basis)
+    # MB PART #
 
-        #- SP PART -#
+    ψ_rel = Relative(pn, basis, bi, Nx, Ny, type, UpperLimit, shift_amount)
 
-        # coordinates of occupied sites in the MB basis
-        r1 = [real(ComplexCoords(Nx, Ny, basis, bi, type, shift_amount)[1]), imag(ComplexCoords(Nx, Ny, basis, bi, type, shift_amount)[1])]
-        r2 = [real(ComplexCoords(Nx, Ny, basis, bi, type, shift_amount)[2]), imag(ComplexCoords(Nx, Ny, basis, bi, type, shift_amount)[2])]
-        r = [r1, r2]
-        # find lattice index of these coordinates
-        R = indexin(r, SiteCoords) 
-        
-        # SP basis amplitudes corresponding to occupied MB basis
-        α₁ = 𝜓ₛₚ[:,1][R]
-        α₂ = 𝜓ₛₚ[:,2][R]
-        𝜓₁₁ = α₁[1] * α₁[2] # \phi_1(r_1) * \phi_1(r_2) 
-        𝜓₂₂ = α₂[1] * α₂[2] # \phi_2(r_1) * \phi_2(r_2) 
-        𝜓₁₂ = α₁[1] * α₂[2] # \phi_1(r_1) * \phi_2(r_2) 
+    ψ_CM0 = CenterOfMass(basis, bi, Nx, Ny, Nphi, 0, α, UpperLimit, shift_amount, type, WF)
+    ψ_CM1 = CenterOfMass(basis, bi, Nx, Ny, Nphi, 1, α, UpperLimit, shift_amount, type, WF)
+    #ψ_CM2 = CenterOfMass(basis, bi, Nx, Ny, Nphi, 2, α, UpperLimit, shift_amount, type, WF)
+    Zcm = Z(basis, bi, type, shift_amount)
+    ψ_CM2 = v(1/2, -1/2, Zcm/Nx, im*Ny/Nx, UpperLimit)  
 
-        𝜓ᵢⱼ = [𝜓₁₁, 𝜓₂₂, 𝜓₁₂]
+    ExpFun = e_CB(Nx, Ny, lb, lb_prime, basis, bi, type, shift_amount)
 
-        # MB PART #
- 
-        ψ_rel = Relative(pn, basis, bi, Nx, Ny, type, UpperLimit, shift_amount)
+    𝜓₁ = ψ_rel*ψ_CM0*ExpFun # \psi_L(r_1,r_2) for d=0
+    𝜓₂ = ψ_rel*ψ_CM1*ExpFun # \psi_L(r_1,r_2) for d=1
+    𝜓₃ = ψ_rel*ψ_CM2*ExpFun # \psi_L(r_1,r_2) for d=2
 
-        
-        #= ψ_CM0 = CenterOfMass(basis, bi, Nx, Ny, 0, alpha, UpperLimit, shift_amount, type)
-        ψ_CM1 = CenterOfMass(basis, bi, Nx, Ny, 1, alpha, UpperLimit, shift_amount, type)
-        ψ_CM2 = CenterOfMass(basis, bi, Nx, Ny, 2, alpha, UpperLimit, shift_amount, type) =#
-        
+    𝜓ₐ = [𝜓₁, 𝜓₂, 𝜓₃] 
 
-        #= ψ_CM0 = CenterOfMass_CB(basis, bi, Nx, Ny, pn, Nphi, 0, alpha, UpperLimit, shift_amount, type)
-        ψ_CM1 = CenterOfMass_CB(basis, bi, Nx, Ny, pn, Nphi, 1, alpha, UpperLimit, shift_amount, type)
-        ψ_CM2 = CenterOfMass_CB(basis, bi, Nx, Ny, pn, Nphi, 2, alpha, UpperLimit, shift_amount, type) =#
+    return kron(𝜓ᵢⱼ, 𝜓ₐ) # \phi_1(r_1) * \phi_1(r_2) * \psi_L(r_1,r_2)
+end
 
-        ψ_CM0 = CM_New_2(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row0)
-        ψ_CM1 = CM_New_2(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row1)
-        ψ_CM2 = CM_New_2(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row2)
+function Ansatz(basis, Nx, Ny, α, lb, lb_prime, UpperLimit, type, shift_amount, WF, 𝜓ₛₚ)
 
-        #= ψ_CM0 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row0)
-        ψ_CM1 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row1)
-        ψ_CM2 = CM_New(basis, bi, Nx, Ny, type, UpperLimit, shift_amount, z_nu_row2) =#
+    if WF == "Laughlin" 
+        ψ_rel = [Relative(pn, basis, bi, Nx, Ny, type, UpperLimit, shift_amount) for bi in 1:length(basis)]
 
-        ExpFun = e_CB(Nx, Ny, lb, lb_prime, basis, bi, type, shift_amount)
+        ExpFun = [e(Nx, Ny, lb, basis, i, type, shift_amount) for i in 1:length(basis)]
 
-        𝜓₁ = ψ_rel*ψ_CM0*ExpFun # \psi_L(r_1,r_2) for d=0
-        𝜓₂ = ψ_rel*ψ_CM1*ExpFun # \psi_L(r_1,r_2) for d=1
-        𝜓₃ = ψ_rel*ψ_CM2*ExpFun # \psi_L(r_1,r_2) for d=2
+        d = 0 
+        ψ_CM0 = [CenterOfMass(basis, bi, Nx, Ny, Nphi, d, α, UpperLimit, shift_amount, type, WF) for bi in 1:length(basis)]
+        ψ0 = normalize(ψ_rel.*ψ_CM0.*ExpFun)
 
-        𝜓ₐ = [𝜓₁, 𝜓₂, 𝜓₃]
+        d = 1
+        ψ_CM1 = [CenterOfMass(basis, bi, Nx, Ny, Npi, d, α, UpperLimit, shift_amount, type, WF) for bi in 1:length(basis)]
+        ψ1 = normalize(ψ_rel.*ψ_CM1.*ExpFun)
 
-        ψ_CB[bi,:] = kron(𝜓ᵢⱼ, 𝜓ₐ) # \phi_1(r_1) * \phi_1(r_2) * \psi_L(r_1,r_2)
+        Ansatz = [ψ0 ψ1] # two degenerate ground state at ν=1/2
 
+    elseif WF == "CB"
+        @warn "CompositeBoson function is valid only for 2 particle and two sp ground state and degeneracy."
+
+        SiteCoords = SiteCoordinates(Nx, Ny)
+
+        Ansatz = zeros(ComplexF64, length(basis), 9) # 3(sp) * 3(MB)
+
+        for bi in eachindex(basis)
+            Ansatz[bi,:] = CB_Component(Nx, Ny, Nphi, basis, bi, type, shift_amount, SiteCoords, 𝜓ₛₚ, UpperLimit, WF, lb, lb_prime)
+        end 
     end
-
-    return ψ_CB
+    return Ansatz
 end

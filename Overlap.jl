@@ -32,7 +32,8 @@ E, ψ = Solve(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, Nev, perturbat
 OccBasis = MBBasis(pn, Nx, Ny, HardCore).occupations
 type = "fermion"
 UpperLimit = 10
-ψ0, ψ1 = GeneralizedLaughlin(OccBasis, Nx, Ny, UpperLimit, type)
+# ψ0, ψ1 = GeneralizedLaughlin(OccBasis, Nx, Ny, UpperLimit, type)
+Ansatz(basis, Nx, Ny, UpperLimit, type, shift_amount, WF)
 
 ψ0'*ψ1 #check
 
