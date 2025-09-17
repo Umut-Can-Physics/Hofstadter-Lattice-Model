@@ -3,8 +3,9 @@
 
 pn = 2
 Nx = Ny = 10
+N = Nx * Ny
 HardCore = true
-OccBasis = MBBasis(pn, Nx, Ny, HardCore).occupations
+OccBasis = MBBasis(pn, N, HardCore).occupations
 
 a = 1/2
 b = -1/2

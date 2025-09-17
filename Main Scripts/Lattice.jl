@@ -16,7 +16,7 @@ end
 
 function neighbors(Nx::Int, Ny::Int, periodicity::Bool)
     
-    lattice = square_lattice(Nx,Ny)[1]
+    lattice = square_lattice(Nx, Ny)[1] 
     Neighbors = []
 
     # Periodicity On
@@ -24,7 +24,10 @@ function neighbors(Nx::Int, Ny::Int, periodicity::Bool)
            
         for j in 0:Ny-1
             for i in 0:Nx-1
-                x = [lattice[mod(j,Ny),mod(i-1,Nx)],lattice[mod(j+1,Ny),mod(i,Nx)],lattice[mod(j,Ny),mod(i+1,Nx)],lattice[mod(j-1,Ny),mod(i,Nx)]]
+                x = [lattice[mod(j,Ny),mod(i-1,Nx)],
+                    lattice[mod(j+1,Ny),mod(i,Nx)],
+                    lattice[mod(j,Ny),mod(i+1,Nx)],
+                    lattice[mod(j-1,Ny),mod(i,Nx)]]
                 x = unique(x)
                 push!(Neighbors,x)
             end
@@ -65,4 +68,23 @@ function neighbors(Nx::Int, Ny::Int, periodicity::Bool)
     end
     
     return Neighbors
+end
+
+struct Lattice
+    Nx
+    Ny
+    N
+    site_matrix
+    coordinates
+    periodicity
+    neig
+    sp_basis
+    z_coords
+    function Lattice(Nx, Ny, periodicity)
+        site_matrix, coordinates = square_lattice(Nx, Ny)
+        z_coords = coordinates[:,1] .+ coordinates[:,2]*im
+        neig = neighbors(Nx, Ny, periodicity)
+        sp_basis = NLevelBasis(Nx*Ny)
+        new(Nx, Ny, Nx*Ny, site_matrix, coordinates, periodicity, neig, sp_basis, z_coords) 
+    end
 end

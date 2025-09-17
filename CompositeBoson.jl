@@ -1,45 +1,34 @@
 include("Main Scripts/Hofstadter.jl")
 using .Hofstadter
 using Plots
+include("Run.jl")
 
-pn = 2
-Nx = 6
-Ny = 6
-α = -1/6
-U = 1.0
-periodicity = true
-HardCore = true
-Nphi = abs(Nx * Ny * α)
-Nd = Int(Nphi-2*pn)
-GroundStateDegeneracy = factorial(Nd + pn - 1) / (factorial(pn - 1)*factorial(Nd)) * (Nphi / pn)
-Nev = Int(GroundStateDegeneracy) + 1
-gauge = "Landau" # "Landau", "Symmetric"
-imp_str = 0.1
-perturbation = false
+Nev = Int(param.GroundStateDegeneracy) + 6
+method = "Lapack" # "Lapack", "Arpack", "KrylovKit"
 
-problem_type = "MB" # 'SP' or 'MB'
-method = "Arpack" # "Lapack", "Arpack", "KrylovKit"
-E_mb, ψ_mb, H_mb = Solve(pn, Nx, Ny, α, periodicity, gauge, HardCore, U, Nev, perturbation, imp_str, method, problem_type)
-scatter(real(E_mb[1:Nev]))
+# MB
+
+ϵ, ψ = SolveMatrix(HH, Nev, method)
+scatter(real(ϵ[1:Nev]))
+
+# SP
+
+H_sp = HoppingOp(lat, lat.sp_basis, param)
+ϵ_sp, ψ_sp = SolveMatrix(H_sp, Nev, method)
+scatter(real(ϵ_sp))
+
+# CB
 
 type = "fermion" # HardCore Boson
 UpperLimit = 10
-shift_amount = 0
-lb = 1/sqrt(2*pi*abs(α))
-mb = MBBasis(pn, Nx, Ny, HardCore)
-OccBasis = MBBasis(pn, Nx, Ny, HardCore).occupations
-
-problem_type = "SP"
 alpha_prime = -1/18
-E_sp, ψ_sp = Solve(pn, Nx, Ny, alpha_prime, periodicity, gauge, HardCore, U, Nev, perturbation, imp_str, method, problem_type)
-scatter(real(E_sp))
-
 lb_prime = 1/sqrt(2*pi*abs(alpha_prime))
 WF = "CB" # "Laughlin" or "CB"
-Ψ_CB = Ansatz(OccBasis, Nx, Ny, α, lb, lb_prime, UpperLimit, type, shift_amount, WF, ψ_sp)
+Ψ_CB = Ansatz(lat, mb_basis, UpperLimit, param.lb, lb_prime, WF, ψ_sp)
+
 # Normalize column
 Ψ_CB = normalize.(eachcol(Ψ_CB))
-Ψ_ED = ψ_mb[:,1:9]
+Ψ_ED = ψ[:,1:9]
 OverlapsMatrix = zeros(ComplexF64, 9, 9)
 for k in 1:9
     for l in 1:9

@@ -5,48 +5,32 @@ using Arpack
 Sort eigenstates by real energies
 """
 function SortStates(E, ψ)
-    try
-        i = sortperm(E, by=real)
-        E = E[i]
+    i = sortperm(E, by=real)
+    E = E[i]
+    if length(size(ψ)) == 2 # If data is matrix object
         ψ = ψ[:, i] 
-    catch e
-        # If a BoundsError occurs, catch it
-        if isa(e, BoundsError)
-            i = sortperm(E, by=real)
-            E = E[i]
-            ψ = ψ[i]
-            return E, ψ
-        else
-            # Re-throw any other unexpected errors
-            throw(e)
-        end
+    elseif length(size(ψ)) == 1 # If data is QoJulia object
+        ψ = ψ[i]
     end
+
     return E, ψ
 end
 
-function Solve(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, Nev, perturbation, imp_str, method, problem_type)
-    if problem_type == "MB"
-        H = HubbardHofstadter(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, perturbation, imp_str)
-        println("Solving the system using ", method, " method for ", problem_type, " problem...")
-        if method == "Lapack"
-            H = Matrix(H.data)
-            E, ψ = eigen(H); 
-            E, ψ = SortStates(E, ψ)
-        elseif method == "Arpack"
-            H = Matrix(H.data)
-            E, ψ = eigs(H, nev=Nev, which=:SR)
-            E, ψ = SortStates(E, ψ)
-        elseif method == "KrylovKit"
-            E, ψ = eigenstates(dense(H), Nev)
-            E, ψ = SortStates(E, ψ)
-        else
-            error("Invalid method. Use 'Lapack', 'Arpack', or 'KrylovKit'.")
-        end
-    elseif problem_type == "SP"
-        H = SingleParticleModel(Nx, Ny, alpha, periodicity, gauge)
-        println("Solving the system using ", method, " method for ", problem_type, " problem...")
+function SolveMatrix(H, Nev, method)
+    if method == "Lapack"
+        println("Hi!")
+        H = Matrix(H.data)
+        E, ψ = eigen(H); 
+        E, ψ = SortStates(E, ψ)
+    elseif method == "Arpack"
+        H = Matrix(H.data)
         E, ψ = eigs(H, nev=Nev, which=:SR)
         E, ψ = SortStates(E, ψ)
+    elseif method == "KrylovKit"
+        E, ψ = eigenstates(dense(H), Nev)
+        E, ψ = SortStates(E, ψ) 
+    else
+        error("Invalid method. Use 'Lapack', 'Arpack', or 'KrylovKit'.")
     end
-    return E, ψ, H
+    return E, ψ
 end

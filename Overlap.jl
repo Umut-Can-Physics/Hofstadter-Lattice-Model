@@ -2,40 +2,22 @@ using Plots
 using LaTeXStrings
 includet("Main Scripts/Hofstadter.jl")
 using .Hofstadter
-#= includet("Laughlin Scripts/GeneralizedLaughlin.jl")
-includet("Laughlin Scripts/JacobiThetaFunction.jl")
-includet("Main Scripts/Lattice.jl")
-includet("Main Scripts/Model.jl")
-includet("Main Scripts/MBBasis.jl")
-includet("Main Scripts/Operators.jl")
-includet("Main Scripts/ED.jl")
-includet("Main Scripts/Utilities.jl") =#
+include("Run.jl") # Build a model
 
-pn = 2
-Nx = 4
-Ny = 4
-alpha = -1/4
-U = 1.0
-lb = 1/sqrt(2*pi*abs(alpha))
-periodicity = true
-HardCore = true
-Nev = 10
-gauge = "Landau" # "Landau", "Symmetric"
-shift_amount = 0
-
-imp_str = 0.0
-perturbation = false
-method = "Lapack" # "Lapack", "Arpack", "KrylovKit"
-problem_type = "MB" # 'SP' or 'MB'
-E, ψ = Solve(pn, Nx, Ny, alpha, periodicity, gauge, HardCore, U, Nev, perturbation, imp_str, method, problem_type)
-
-OccBasis = MBBasis(pn, Nx, Ny, HardCore).occupations
-type = "fermion"
 UpperLimit = 10
-# ψ0, ψ1 = GeneralizedLaughlin(OccBasis, Nx, Ny, UpperLimit, type)
-Ansatz(basis, Nx, Ny, UpperLimit, type, shift_amount, WF)
+WF ="Laughlin"
+ansatz = Ansatz(lat, mb_basis, UpperLimit, param.lb, 0, WF, nothing)
+ψ0 = ansatz[:,1]
+ψ1 = ansatz[:,2]
 
-ψ0'*ψ1 #check
+Nev = Int(param.GroundStateDegeneracy) + 6
+method = "Lapack" # "Lapack", "Arpack", "KrylovKit"
+ϵ, ψ = SolveMatrix(HH, Nev, method)
+scatter(real(ϵ))
+
+# Note: Solve the model using Lapack, or use Arpack and optimize coefficient of eigenstates.
+
+ψ0'*ψ1
 
 scatter(abs.(ψ0), label=L"\psi_{d=0}", xlabel="Basis order", ylabel=L"|\psi|")
 scatter!(abs.(ψ1))
@@ -52,13 +34,8 @@ Overlap(ψ0, ψ[:,2])
 Overlap(ψ1, ψ[:,1])
 Overlap(ψ1, ψ[:,2])
 
-Overlap(ψ0, ψ[1].data)
-Overlap(ψ0, ψ[2].data)
-Overlap(ψ1, ψ[1].data)
-Overlap(ψ1, ψ[2].data)
-
-W = OverlapMat(ψ0, ψ1, ψ[:,1], ψ[:,2])
+W = OverlapMat(psi0, psi1, ψ[:,1], ψ[:,2])
 HilbertSchmidtNorm(W)
 
-overlap_values = CoeffOptimization(ψ0, ψ1, ψ[:,1])
+overlap_values = CoeffOptimization(ψ0, ψ1, ψ[:,2])
 maximum(overlap_values)
