@@ -95,7 +95,7 @@ struct ModelParams
     function ModelParams(Nx, Ny, α, pn)
         Nphi = abs(Nx * Ny * α)
         Nd = Int(Nphi-2*pn)
-        GroundStateDegeneracy = factorial(Nd + pn - 1) / (factorial(pn - 1)*factorial(Nd)) * (Nphi / pn)
+        GroundStateDegeneracy = factorial(Nd + pn - 1) / (factorial(pn - 1) * factorial(Nd)) * (Nphi / pn)
         lb = 1/sqrt(2*pi*abs(α))
         new(Nx, Ny, α, gauge, HardCore, pn, U, perturbation, imp_str, Nphi, Nd, GroundStateDegeneracy, lb)
     end

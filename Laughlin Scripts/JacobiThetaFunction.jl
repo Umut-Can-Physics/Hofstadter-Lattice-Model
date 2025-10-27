@@ -1,7 +1,7 @@
 # The definition of the Jacobi-Theta function
 function v(a, b, z, τ, UpperLimit)
     ThetaFun = [exp(im*pi*τ*(n+a).^2 + 2*pi*im*(n+a)*(z+b)) for n in -UpperLimit:UpperLimit] 
-    return sum(ThetaFun)  
+    return sum(ThetaFun)    
 end
 
 # Relative part of the generalized Laughlin wave function
@@ -21,7 +21,7 @@ function Relative(pn, occupied_site_ind, Lattice, UpperLimit)
 end 
 
 # Center of mass part of the Laughlin wave function
-function CenterOfMass(mb_basis, bi, Lattice, Nphi, d, UpperLimit, WF)
+function CenterOfMass(mb_basis, bi, Lattice, Nphi, d, qq, UpperLimit, WF)
     θ = 0
     if WF == "Laughlin"    
         a = d/2 + (Nphi-2)/4 # d=0 or d=1 refer to two degenerate ground state at ν=1/2
@@ -31,12 +31,11 @@ function CenterOfMass(mb_basis, bi, Lattice, Nphi, d, UpperLimit, WF)
         θ = v(a, b, z, τ, UpperLimit) 
     elseif WF == "CB"
         #qq = denominator(rationalize(pn/Nphi)) # Denominator of the filling factor ν
-        qq = 2
         a = d/qq + (Nphi-qq)/(2*qq)
-        b = -(Nphi-qq)/2 
+        b = -(Nphi-qq)/2  
         z = qq * sum(Lattice.z_coords[ptl_site_ind(mb_basis,bi)]) / Nx
         τ = qq*im*Ny/Nx
-        θ = v(a, b, z, τ, UpperLimit) 
+        θ = v(a, b, z, τ, UpperLimit)  
     end
     return θ
 end

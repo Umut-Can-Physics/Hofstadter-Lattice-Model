@@ -11,7 +11,7 @@ function QRDecomp(M::Matrix)
 end
 
 function Overlap(ψ1, ψ2)
-    return abs.(ψ1'*ψ2)^2
+    return ψ1'*ψ2
 end
 
 "Overlap matrix for Laughlin ν=1/2"
@@ -20,7 +20,7 @@ function OverlapMat(ψ0, ψ1, ψED_1, ψED_2)
     AnalyticWaveFunction = [ψ0, ψ1]
     # ED States
     EDStates = [ψED_1, ψED_2]
-    OvMat = zeros(2,2) 
+    OvMat = zeros(Complex, 2,2) 
     for i in 1:2
         for j in 1:2
             OvMat[i,j] = Overlap(AnalyticWaveFunction[i], EDStates[j])
@@ -31,8 +31,8 @@ end
 
 function HilbertSchmidtNorm(W)
     dim = size(W, 1) # Dimension of square matrix
-    WW = sum(abs.(W'*W).^2)
-    return sqrt((1/dim)*WW)
+    WW = sum(W'*W)
+    return (1/dim)*WW
 end
 
 function RealSpaceDensity(Nx, Ny, ψ,mb)

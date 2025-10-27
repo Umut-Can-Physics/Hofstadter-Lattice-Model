@@ -11,7 +11,7 @@ ansatz = Ansatz(lat, mb_basis, UpperLimit, param.lb, 0, WF, nothing)
 ψ1 = ansatz[:,2]
 
 Nev = Int(param.GroundStateDegeneracy) + 6
-method = "Lapack" # "Lapack", "Arpack", "KrylovKit"
+method = "Arpack" # "Lapack", "Arpack", "KrylovKit"
 ϵ, ψ = SolveMatrix(HH, Nev, method)
 scatter(real(ϵ))
 
@@ -34,7 +34,7 @@ Overlap(ψ0, ψ[:,2])
 Overlap(ψ1, ψ[:,1])
 Overlap(ψ1, ψ[:,2])
 
-W = OverlapMat(psi0, psi1, ψ[:,1], ψ[:,2])
+W = OverlapMat(ψ0, ψ1, ψ[:,1], ψ[:,2])
 HilbertSchmidtNorm(W)
 
 overlap_values = CoeffOptimization(ψ0, ψ1, ψ[:,2])
