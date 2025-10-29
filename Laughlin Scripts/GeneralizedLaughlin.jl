@@ -1,33 +1,61 @@
-using Combinatorics
+"""
+Get occupied particle site indices from many-body basis for a given basis index 
+"""
+ptl_site_ind(mb_basis, bi) = findall(x -> x≠0, mb_basis.occupations[bi])
 
-ptl_site_ind(mb_basis,bi) = findall(x->x≠0, mb_basis.occupations[bi])
-
+"""
+Calculate sum of y-coordinates squared for occupied sites in a given many-body basis index
+"""
 ∑(Lattice, mb_basis, bi) = sum( Lattice.coordinates[:,2][ptl_site_ind(mb_basis,bi)] .^2 )
 
-∑_x(Lattice, mb_basis, bi) = sum( Lattice.coordinates[:,1][ptl_site_ind(mb_basis,bi)])
+"""
+Calculate sum of x-coordinates for occupied sites in a given many-body basis index
+"""
+∑x(Lattice, mb_basis, bi) = sum( Lattice.coordinates[:,1][ptl_site_ind(mb_basis,bi)])
 
+"""
+Calculate exponential factor for occupied sites in a given many-body basis index
+"""
 e(Lattice, mb_basis, bi, lb) = exp( - ∑(Lattice, mb_basis, bi) / (2*lb^2) ) 
 
+"""   
+Calculate exponential factor of the Composite Boson wavefunction for occupied sites in a given many-body basis index
+"""
 e_CB(Lattice, lb, lb_prime, bi) = exp( - ∑(Lattice, mb_basis, bi)/2 * ( 1/lb^2 - 1/lb_prime^2 ) )
 
+"""
+Calculate sum of z-coordinates for occupied sites in a given many-body basis index
+"""
 function Z_cm(Lattice, mb_basis, bi)
     return sum(Lattice.z_coords[ptl_site_ind(mb_basis,bi)])
 end
 
-function PsiSpAnalytic(k, Nx, Ny, lat, UpperLimit, Nphi_prime, τ)
+"""
+Calculate single-particle wave function in terms of Jacobi theta function
+"""
+function SpAnalyticWaveFunction(k, Nx, Ny, lat, UpperLimit, Nphi_prime, τ)
     return exp.(-pi * Nphi_prime/(Nx*Ny) .* (imag.(lat.z_coords)).^2).*v.(k/Nphi_prime, 0, Nphi_prime*lat.z_coords/Nx, τ*Nphi_prime, UpperLimit)
 end
 
+"""
+Calculate trial center of mass wave function in terms of Jacobi theta function
+"""
 function CMAnsatz(Lattice, mb_basis, bi, Nx, Ny, ar)
     Zcm = Z_cm(Lattice, mb_basis, bi)
     return v(ar, 0, 2*Zcm / Nx, 2*im*Ny/Nx, 20)*exp(-0*(4*pi*im*ar/Nx)*real.(Zcm))
 end
 
+"""
+Calculate trial center of mass wave function in terms of Jacobi theta function
+"""
 function CMAnsatz2(Lattice, mb_basis, bi, Nx, Ny, ar)
     Zcm = Z_cm(Lattice, mb_basis, bi)
     return v(0, -ar/2, 2*(Zcm/Nx + ar/2), 2*im*Ny/Nx, 20)
 end
 
+"""
+Calculate Composite Boson wave function for a given many-body basis index (components)
+"""
 function CB_Component(Lattice, mb_basis, bi, 𝜓ₛₚ, UpperLimit, lb, lb_prime, qq, pp)
     #- SP PART -#
 
@@ -97,6 +125,9 @@ function CB_Component(Lattice, mb_basis, bi, 𝜓ₛₚ, UpperLimit, lb, lb_prim
     return kron(𝜓ᵢⱼ, ψ_mb) # \phi_1(r_1) * \phi_1(r_2) * \psi_L(r_1,r_2)
 end
 
+"""
+Construct the ansatz wavefunction vector for given many-body basis and parameters
+"""
 function Ansatz(Lattice, mb_basis, UpperLimit, lb, lb_prime, WF, 𝜓ₛₚ, qq, number_of_ansatz, pp) 
 
     if WF == "Laughlin" 
@@ -116,7 +147,7 @@ function Ansatz(Lattice, mb_basis, UpperLimit, lb, lb_prime, WF, 𝜓ₛₚ, qq,
         Ansatz = [ψ0 ψ1] # two degenerate ground state at ν=1/2
 
     elseif WF == "CB"
-        @warn "CompositeBoson function is valid only for 2 particle and two sp ground state and degeneracy."
+        #@warn "CompositeBoson function is valid only for 2 particle and two sp ground state and degeneracy."
 
         Ansatz = zeros(ComplexF64, length(mb_basis), number_of_ansatz) # 3(sp) * 3(MB)
 
@@ -124,5 +155,6 @@ function Ansatz(Lattice, mb_basis, UpperLimit, lb, lb_prime, WF, 𝜓ₛₚ, qq,
             Ansatz[bi,:] = CB_Component(Lattice, mb_basis, bi, 𝜓ₛₚ, UpperLimit, lb, lb_prime, qq, pp)
         end 
     end
+    
     return Ansatz
 end

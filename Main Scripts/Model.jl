@@ -4,7 +4,7 @@ function SingleParticleModel(Lattice, α::Float64, gauge::String)
         error("Invalid gauge choice. Use 'Landau' or 'Symmetric'.")
     end
 
-    @warn("Symmetric gauge is not implemented yet, use Landau gauge instead.")
+    #@warn("Symmetric gauge is not implemented yet, use Landau gauge instead.")
  
     Nx = Lattice.Nx
     Ny = Lattice.Ny

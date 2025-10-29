@@ -2,14 +2,14 @@ include("Main Scripts/Hofstadter.jl")
 using .Hofstadter
 using Plots
 
-Nx = 6
-Ny = 6
+Nx = 4
+Ny = 4
 periodicity = true
 lat = Lattice(Nx, Ny, periodicity)
 
 pn = 2
-α = -1/6
-U = 1.0
+α = -1/4
+U = 0
 HardCore = true
 imp_str = 0.1
 perturbation = false

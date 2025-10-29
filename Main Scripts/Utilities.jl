@@ -11,7 +11,7 @@ function QRDecomp(M::Matrix)
 end
 
 function Overlap(ψ1, ψ2)
-    return ψ1'*ψ2
+    return abs.(ψ1'*ψ2)^2
 end
 
 "Overlap matrix for Laughlin ν=1/2"

@@ -5,7 +5,7 @@ using Serialization
 include("Run.jl")
 
 Nev = Int(param.GroundStateDegeneracy) + 10
-method = "Lapack" # "Lapack", "Arpack", "KrylovKit"
+method = "Arpack" # "Lapack", "Arpack", "KrylovKit"
 
 # MB
 
@@ -23,8 +23,8 @@ scatter(real(ϵ_sp))
 UpperLimit = 10
 τ = im*Ny/Nx
 Nphi_prime = abs(Int(Nx*Ny*alpha_prime))
-ψ_sp_1 = PsiSpAnalytic(1, Nx, Ny, lat, UpperLimit, Nphi_prime, τ)
-ψ_sp_2 = PsiSpAnalytic(2, Nx, Ny, lat, UpperLimit, Nphi_prime, τ)
+ψ_sp_1 = SpAnalyticWaveFunction(1, Nx, Ny, lat, UpperLimit, Nphi_prime, τ)
+ψ_sp_2 = SpAnalyticWaveFunction(2, Nx, Ny, lat, UpperLimit, Nphi_prime, τ)
 ψ_sp_analytic = hcat(ψ_sp_1, ψ_sp_2)
 
 # CB

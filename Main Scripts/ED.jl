@@ -18,7 +18,6 @@ end
 
 function SolveMatrix(H, Nev, method)
     if method == "Lapack"
-        println("Hi!")
         H = Matrix(H.data)
         E, ψ = eigen(H); 
         E, ψ = SortStates(E, ψ)
